@@ -4,9 +4,13 @@ extension Calendar.Component: CaseIterable, Comparable {
 
 	public typealias AllCases = Set<Calendar.Component>
 
-	public static var week: Calendar.Component { .weekOfYear }
+	public static var week: Calendar.Component {
+        .weekOfYear
+    }
 
-	public static var sorted: [Calendar.Component] { [.nanosecond, .second, .minute, .hour, .day, .weekday, .weekdayOrdinal, .weekOfMonth, .weekOfYear, .month, .quarter, .year, .yearForWeekOfYear, .timeZone, .era, .calendar] }
+	public static var sorted: [Calendar.Component] {
+        [.nanosecond, .second, .minute, .hour, .day, .weekday, .weekdayOrdinal, .weekOfMonth, .weekOfYear, .month, .quarter, .year, .yearForWeekOfYear, .timeZone, .era, .calendar]
+    }
 
 	public static var allCases: Set<Calendar.Component> {
 		[.year, .month, .day, .hour, .minute, .second, .weekday, .weekdayOrdinal, .quarter, .weekOfMonth, .weekOfYear, .yearForWeekOfYear, .nanosecond, .calendar, .timeZone, .era]
@@ -14,8 +18,10 @@ extension Calendar.Component: CaseIterable, Comparable {
 
 	public var first: Int {
 		switch self {
-		case .era, .year, .month, .day, .weekday, .weekOfYear, .weekOfMonth, .weekdayOrdinal, .yearForWeekOfYear: return 1
-		default: return 0
+		case .era, .year, .month, .day, .weekday, .weekOfYear, .weekOfMonth, .weekdayOrdinal, .yearForWeekOfYear:
+            return 1
+		default:
+            return 0
 		}
 	}
 
@@ -160,7 +166,13 @@ extension Calendar.Component: Codable, RawRepresentable, CustomStringConvertible
 		if let it = Calendar.Component(rawValue: raw) {
 			self = it
 		} else {
-			throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid raw value \(raw) for Calendar.Component", underlyingError: nil))
+			throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Invalid raw value \(raw) for Calendar.Component",
+                    underlyingError: nil
+                )
+            )
 		}
 	}
 
