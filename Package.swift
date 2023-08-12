@@ -8,13 +8,8 @@ let package = Package(
 	products: [
 		.library(name: "VDDate", targets: ["VDDate"]),
 	],
-	dependencies: [
-	],
 	targets: [
-		.target(
-			name: "VDDate",
-			dependencies: [
-			]
-		),
+		.target(name: "VDDate"),
+		.testTarget(name: "VDDateTests", dependencies: ["VDDate"]),
 	]
 )

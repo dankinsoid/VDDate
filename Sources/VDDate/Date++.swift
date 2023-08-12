@@ -36,13 +36,11 @@ public extension Date {
 	}
 
 	init?(
-		components: DateComponents,
-		calendar: Calendar = .default,
-		timeZone: TimeZone = .default
+		components: DateComponents
 	) {
 		var components = components
-		components.calendar = calendar
-		components.timeZone = timeZone
+		components.calendar = components.calendar ?? .default
+		components.timeZone = components.timeZone ?? .default
 		guard let date = components.date else { return nil }
 		self = date
 	}
@@ -51,12 +49,12 @@ public extension Date {
 		from string: String,
 		format: String,
 		locale: Locale = .default,
-		timezone: TimeZone = .default
+		timeZone: TimeZone = .default
 	) {
 		let formatter = DateFormatter()
 		formatter.dateFormat = format
 		formatter.locale = locale
-		formatter.timeZone = timezone
+		formatter.timeZone = timeZone
 		guard let date = formatter.date(from: string) else { return nil }
 		self = date
 	}
@@ -91,9 +89,9 @@ public extension Date {
 	}
 
 	/// A string representing the date and time in ISO 8601 format.
-	var iso860: String {
+	var iso8601: String {
 		string(
-			"yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
+			.iso8601,
 			locale: Locale(identifier: "en_US_POSIX"),
 			timeZone: TimeZone(secondsFromGMT: 0) ?? .default
 		)
@@ -107,7 +105,17 @@ public extension Date {
 	/// - Parameters:
 	///   - calendar: The calendar to use for extracting the components.
 	/// - Returns: The components of the date.
-	func components(calendar: Calendar = .default) -> DateComponents {
+	var components: DateComponents {
+		get { components(calendar: .default) }
+		set { self = setting(newValue) }
+	}
+
+	/// Returns the components of the date, using the specified calendar.
+	///
+	/// - Parameters:
+	///   - calendar: The calendar to use for extracting the components.
+	/// - Returns: The components of the date.
+	func components(calendar: Calendar) -> DateComponents {
 		calendar.dateComponents(Calendar.Component.allCases, from: self)
 	}
 
@@ -146,6 +154,7 @@ public extension Date {
 	///   - calendar: The calendar to use
 	/// - Returns: The last moment of the given date.
 	func end(of component: Calendar.Component, accuracy: Calendar.Component? = nil, calendar: Calendar = .default) -> Date {
+		guard component > .second else { return self }
 		var smaller: Calendar.Component?
 		if let smallest = accuracy, calendar.range(of: smallest, in: component, for: self) != nil {
 			if smallest == .nanosecond {
@@ -165,8 +174,9 @@ public extension Date {
 
 	func matches(_ components: DateComponents, calendar: Calendar = .default) -> Bool {
 		for component in Calendar.Component.allCases {
-			guard let value = components.value(for: component) else { continue }
+			guard let value = components[component] else { continue }
 			if calendar.component(component, from: self) != value {
+				print(component, value)
 				return false
 			}
 		}
@@ -196,7 +206,7 @@ public extension Date {
 			[component],
 			from: date.start(of: component, calendar: calendar),
 			to: start(of: component, calendar: calendar)
-		).value(for: component) ?? 0
+		)[component] ?? 0
 	}
 
 	func range(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Range<Int>? {
@@ -205,12 +215,11 @@ public extension Date {
 
 	func range(byAdding difference: DateDifference, calendar: Calendar = .default) -> Range<Date> {
 		let new = adding(difference)
-		if new < self {
+		if new <= self {
 			return new ..< self
-		} else if self == new {
-			return self ..< (self + .second)
+		} else {
+			return self ..< new
 		}
-		return self ..< new
 	}
 
 	func dates(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Range<Date>? {
@@ -233,10 +242,14 @@ public extension Date {
 		}
 	}
 
-	func string(_ format: String, locale: Locale = .default, timeZone: TimeZone = .default) -> String {
+	func string(
+		_ format: DateFormat,
+		locale: Locale = .default,
+		timeZone: TimeZone = .default
+	) -> String {
 		let formatter = DateFormatter()
 		formatter.locale = locale
-		formatter.dateFormat = format
+		formatter.dateFormat = format.string
 		formatter.timeZone = timeZone
 		return formatter.string(from: self)
 	}
@@ -256,21 +269,37 @@ public extension Date {
 	}
 
 	func string(
-		_ format: String,
-		relative: [DateComponents: String],
+		_ format: RelativeDateFormat,
 		to date: Date = Date(),
 		locale: Locale = .default,
 		timeZone: TimeZone = .default,
 		calendar: Calendar = .default
 	) -> String {
-		guard !relative.isEmpty else { return string(format, locale: locale, timeZone: timeZone) }
+		guard !format.relativeFormats.isEmpty else { return string(format.defaultFormat, locale: locale, timeZone: timeZone) }
 		let difference = from(date).dateComponents(calendar: calendar)
-		for (comp, format) in relative.sorted(by: { $0.key.minComponent() < $1.key.minComponent() }) {
+		for (comp, format) in format.relativeFormats.sorted(by: { $0.key.minComponent() < $1.key.minComponent() }) {
 			if difference.contains(comp) {
 				return string(format, locale: locale, timeZone: timeZone)
 			}
 		}
-		return string(format, locale: locale, timeZone: timeZone)
+		return string(format.defaultFormat, locale: locale, timeZone: timeZone)
+	}
+
+	func string(
+		_ format: DateFormat,
+		relative: [DateComponents: DateFormat],
+		to date: Date = Date(),
+		locale: Locale = .default,
+		timeZone: TimeZone = .default,
+		calendar: Calendar = .default
+	) -> String {
+		string(
+			RelativeDateFormat(format, relative: relative),
+			to: date,
+			locale: locale,
+			timeZone: timeZone,
+			calendar: calendar
+		)
 	}
 
 	func name(

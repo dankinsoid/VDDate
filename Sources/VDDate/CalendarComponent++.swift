@@ -39,7 +39,7 @@ extension Calendar.Component: CaseIterable, Comparable {
 		case .quarter: return .month
 		case .weekOfMonth: return .day
 		case .weekOfYear: return .day
-		case .yearForWeekOfYear: return .month
+		case .yearForWeekOfYear: return .weekOfYear
 		case .nanosecond: return nil
 		case .calendar: return nil
 		case .timeZone: return nil
@@ -69,7 +69,7 @@ extension Calendar.Component: CaseIterable, Comparable {
 		case .weekday: return .day
 		case .weekdayOrdinal: return .day
 		case .quarter: return .year
-		case .weekOfMonth: return .weekOfYear
+		case .weekOfMonth: return .month
 		case .weekOfYear: return .yearForWeekOfYear
 		case .yearForWeekOfYear: return .era
 		case .nanosecond: return .second

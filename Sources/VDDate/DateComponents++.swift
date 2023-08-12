@@ -19,13 +19,33 @@ extension DateComponents: RawRepresentable, ExpressibleByDictionaryLiteral {
 	public static func nanoseconds(_ value: Int) -> DateComponents { .current(nanosecond: value) }
 
 	public subscript(_ component: Calendar.Component) -> Int? {
-		get { value(for: component) }
-		set { setValue(newValue, for: component) }
+		get {
+			switch component {
+			case .era: return era
+			case .year: return year
+			case .month: return month
+			case .day: return day
+			case .hour: return hour
+			case .minute: return minute
+			case .second: return second
+			case .weekday: return weekday
+			case .weekdayOrdinal: return weekdayOrdinal
+			case .quarter: return quarter
+			case .weekOfMonth: return weekOfMonth
+			case .weekOfYear: return weekOfYear
+			case .yearForWeekOfYear: return yearForWeekOfYear
+			case .nanosecond: return nanosecond
+			default: return nil
+			}
+		}
+		set {
+			setValue(newValue, for: component)
+		}
 	}
 
 	public var rawValue: [Calendar.Component: Int] {
 		Dictionary(
-			Calendar.Component.allCases.compactMap { comp in value(for: comp).map { (comp, $0) } },
+			Calendar.Component.allCases.compactMap { comp in self[comp].map { (comp, $0) } },
 			uniquingKeysWith: { _, s in s }
 		)
 	}
@@ -101,7 +121,7 @@ extension DateComponents: RawRepresentable, ExpressibleByDictionaryLiteral {
 
 	public func contains(_ other: DateComponents) -> Bool {
 		for (key, value) in other.rawValue {
-			if self.value(for: key) != value { return false }
+			if self[key] != value { return false }
 		}
 		return true
 	}
