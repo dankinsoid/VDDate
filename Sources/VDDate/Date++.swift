@@ -1,112 +1,112 @@
 import Foundation
 
 public extension Date {
-    
-    static var today: Date { Date().start(of: .day) }
-    static var yesterday: Date { today - .day }
-    static var tomorrow: Date { today + .day }
+
+	static var today: Date { Date().start(of: .day) }
+	static var yesterday: Date { today - .day }
+	static var tomorrow: Date { today + .day }
 }
 
 public extension Date {
-    
-    init(
-        era: Int = 1,
-        year: Int,
-        month: Int = 1,
-        day: Int = 1,
-        hour: Int = 0,
-        minute: Int = 0,
-        second: Int = 0,
-        nanosecond: Int = 0,
-        calendar: Calendar = .default,
-        timeZone: TimeZone = .default
-    ) {
-        self = DateComponents(
-            calendar: calendar,
-            timeZone: timeZone,
-            era: era,
-            year: year,
-            month: month,
-            day: day,
-            hour: hour,
-            minute: minute,
-            second: second,
-            nanosecond: nanosecond
-        ).date ?? Date()
-    }
-    
-    init?(
-        components: DateComponents,
-        calendar: Calendar = .default,
-        timeZone: TimeZone = .default
-    ) {
-        var components = components
-        components.calendar = calendar
-        components.timeZone = timeZone
-        guard let date = components.date else { return nil }
-        self = date
-    }
-    
-    init?(
-        from string: String,
-        format: String,
-        locale: Locale = .default,
-        timezone: TimeZone = .default)
-    {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        formatter.locale = locale
-        formatter.timeZone = timezone
-        guard let date = formatter.date(from: string) else { return nil }
-        self = date
-    }
+
+	init(
+		era: Int = 1,
+		year: Int,
+		month: Int = 1,
+		day: Int = 1,
+		hour: Int = 0,
+		minute: Int = 0,
+		second: Int = 0,
+		nanosecond: Int = 0,
+		calendar: Calendar = .default,
+		timeZone: TimeZone = .default
+	) {
+		self = DateComponents(
+			calendar: calendar,
+			timeZone: timeZone,
+			era: era,
+			year: year,
+			month: month,
+			day: day,
+			hour: hour,
+			minute: minute,
+			second: second,
+			nanosecond: nanosecond
+		).date ?? Date()
+	}
+
+	init?(
+		components: DateComponents,
+		calendar: Calendar = .default,
+		timeZone: TimeZone = .default
+	) {
+		var components = components
+		components.calendar = calendar
+		components.timeZone = timeZone
+		guard let date = components.date else { return nil }
+		self = date
+	}
+
+	init?(
+		from string: String,
+		format: String,
+		locale: Locale = .default,
+		timezone: TimeZone = .default
+	) {
+		let formatter = DateFormatter()
+		formatter.dateFormat = format
+		formatter.locale = locale
+		formatter.timeZone = timezone
+		guard let date = formatter.date(from: string) else { return nil }
+		self = date
+	}
 }
 
 public extension Date {
-    
-    /// true if the given date is within today, as defined by default calendar and calendar’s locale; otherwise, false.
-    var isToday: Bool { Calendar.default.isDateInToday(self) }
-    
-    /// Returns a Boolean value indicating whether the given date is within today.
-    /// - Parameter calendar: The calendar to use
-    /// - Returns: true if the given date is within today, as defined by the calendar and calendar’s locale; otherwise, false.
-    func isToday(calendar: Calendar) -> Bool { calendar.isDateInToday(self) }
-    
-    /// true if the given date is within yesterday, as defined by default calendar and calendar’s locale; otherwise, false.
-    var isYesterday: Bool { start(of: .day) == .yesterday }
-    
-    /// Returns a Boolean value indicating whether the given date is within today.
-    /// - Parameter calendar: The calendar to use
-    /// - Returns: true if the given date is within yesterday, as defined by the calendar and calendar’s locale; otherwise, false.
-    func isYesterday(calendar: Calendar) -> Bool { start(of: .day, calendar: calendar) == .yesterday }
-    
-    /// true if the given date is within tomorrow, as defined by default calendar and calendar’s locale; otherwise, false.
-    var isTomorrow: Bool { Calendar.default.isDateInTomorrow(self) }
-    
-    /// Returns a Boolean value indicating whether the given date is within today.
-    /// - Parameter calendar: The calendar to use
-    /// - Returns: true if the given date is within tomorrow, as defined by the calendar and calendar’s locale; otherwise, false.
-    func isTomorrow(calendar: Calendar) -> Bool {
-        calendar.isDateInTomorrow(self)
-    }
-    
-    /// A string representing the date and time in ISO 8601 format.
-    var iso860: String {
-        string(
-            "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
-            locale: Locale(identifier: "en_US_POSIX"),
-            timeZone: TimeZone(secondsFromGMT: 0) ?? .default
-        )
-    }
+
+	/// true if the given date is within today, as defined by default calendar and calendar’s locale; otherwise, false.
+	var isToday: Bool { Calendar.default.isDateInToday(self) }
+
+	/// Returns a Boolean value indicating whether the given date is within today.
+	/// - Parameter calendar: The calendar to use
+	/// - Returns: true if the given date is within today, as defined by the calendar and calendar’s locale; otherwise, false.
+	func isToday(calendar: Calendar) -> Bool { calendar.isDateInToday(self) }
+
+	/// true if the given date is within yesterday, as defined by default calendar and calendar’s locale; otherwise, false.
+	var isYesterday: Bool { start(of: .day) == .yesterday }
+
+	/// Returns a Boolean value indicating whether the given date is within today.
+	/// - Parameter calendar: The calendar to use
+	/// - Returns: true if the given date is within yesterday, as defined by the calendar and calendar’s locale; otherwise, false.
+	func isYesterday(calendar: Calendar) -> Bool { start(of: .day, calendar: calendar) == .yesterday }
+
+	/// true if the given date is within tomorrow, as defined by default calendar and calendar’s locale; otherwise, false.
+	var isTomorrow: Bool { Calendar.default.isDateInTomorrow(self) }
+
+	/// Returns a Boolean value indicating whether the given date is within today.
+	/// - Parameter calendar: The calendar to use
+	/// - Returns: true if the given date is within tomorrow, as defined by the calendar and calendar’s locale; otherwise, false.
+	func isTomorrow(calendar: Calendar) -> Bool {
+		calendar.isDateInTomorrow(self)
+	}
+
+	/// A string representing the date and time in ISO 8601 format.
+	var iso860: String {
+		string(
+			"yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
+			locale: Locale(identifier: "en_US_POSIX"),
+			timeZone: TimeZone(secondsFromGMT: 0) ?? .default
+		)
+	}
 }
 
 public extension Date {
-    
-    /// Returns the components of the date, using the specified calendar.
-    ///
-    /// - Parameters:
-    ///   - calendar: The calendar to use for extracting the components.
-    /// - Returns: The components of the date.
+
+	/// Returns the components of the date, using the specified calendar.
+	///
+	/// - Parameters:
+	///   - calendar: The calendar to use for extracting the components.
+	/// - Returns: The components of the date.
 	func components(calendar: Calendar = .default) -> DateComponents {
 		calendar.dateComponents(Calendar.Component.allCases, from: self)
 	}
@@ -172,7 +172,7 @@ public extension Date {
 		}
 		return true
 	}
-    
+
 	func isInSame(_ component: Calendar.Component, as date: Date, calendar: Calendar = .default) -> Bool {
 		if component == .day {
 			return calendar.isDate(self, inSameDayAs: date)
@@ -180,12 +180,12 @@ public extension Date {
 		return start(of: component, calendar: calendar) == date.start(of: component, calendar: calendar)
 	}
 
-    /// Returns a Boolean value indicating whether the given date is within today.
-    /// - Parameter calendar: The calendar to use
-    /// - Returns: true if the given date is within current week, as defined by the calendar and calendar’s locale; otherwise, false.
-    func isCurrent(_ component: Calendar.Component, calendar: Calendar = .default) -> Bool {
-        isInSame(component, as: Date(), calendar: calendar)
-    }
+	/// Returns a Boolean value indicating whether the given date is within today.
+	/// - Parameter calendar: The calendar to use
+	/// - Returns: true if the given date is within current week, as defined by the calendar and calendar’s locale; otherwise, false.
+	func isCurrent(_ component: Calendar.Component, calendar: Calendar = .default) -> Bool {
+		isInSame(component, as: Date(), calendar: calendar)
+	}
 
 	func isEqual(to date: Date, toGranularity: Calendar.Component, calendar: Calendar = .default) -> Bool {
 		calendar.isDate(self, equalTo: date, toGranularity: toGranularity)
@@ -193,10 +193,10 @@ public extension Date {
 
 	func number(of component: Calendar.Component, from date: Date, calendar: Calendar = .default) -> Int {
 		calendar.dateComponents(
-            [component],
-            from: date.start(of: component, calendar: calendar),
-            to: start(of: component, calendar: calendar)
-        ).value(for: component) ?? 0
+			[component],
+			from: date.start(of: component, calendar: calendar),
+			to: start(of: component, calendar: calendar)
+		).value(for: component) ?? 0
 	}
 
 	func range(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Range<Int>? {
@@ -242,11 +242,11 @@ public extension Date {
 	}
 
 	func string(
-        date: DateFormatter.Style = .short,
-        time: DateFormatter.Style = .none,
-        locale: Locale = .default,
-        timeZone: TimeZone = .default
-    ) -> String {
+		date: DateFormatter.Style = .short,
+		time: DateFormatter.Style = .none,
+		locale: Locale = .default,
+		timeZone: TimeZone = .default
+	) -> String {
 		let formatter = DateFormatter()
 		formatter.locale = locale
 		formatter.timeZone = timeZone
@@ -256,13 +256,13 @@ public extension Date {
 	}
 
 	func string(
-        _ format: String,
-        relative: [DateComponents: String],
-        to date: Date = Date(),
-        locale: Locale = .default,
-        timeZone: TimeZone = .default,
-        calendar: Calendar = .default
-    ) -> String {
+		_ format: String,
+		relative: [DateComponents: String],
+		to date: Date = Date(),
+		locale: Locale = .default,
+		timeZone: TimeZone = .default,
+		calendar: Calendar = .default
+	) -> String {
 		guard !relative.isEmpty else { return string(format, locale: locale, timeZone: timeZone) }
 		let difference = from(date).dateComponents(calendar: calendar)
 		for (comp, format) in relative.sorted(by: { $0.key.minComponent() < $1.key.minComponent() }) {
@@ -274,10 +274,10 @@ public extension Date {
 	}
 
 	func name(
-        of component: Calendar.Component,
-        locale: Locale = .default,
-        timeZone: TimeZone = .default
-    ) -> String {
+		of component: Calendar.Component,
+		locale: Locale = .default,
+		timeZone: TimeZone = .default
+	) -> String {
 		switch component {
 		case .era: return string("GGGG", locale: locale, timeZone: timeZone)
 		case .year: return string("yyyy", locale: locale, timeZone: timeZone)
@@ -304,8 +304,8 @@ public extension Date {
 	/// date.ordinality(of: .day, in: .week)
 	/// ```
 	/// The ordinality is in most cases not the same as the decomposed value of the component.
-    /// Typically return values are 1 and greater. For example, the time 00:45 is in the first hour of the day, and for components hour and day respectively, the result would be 1.
-    /// An exception is the week-in-month calculation, which returns 0 for days before the first week in the month containing the date.
+	/// Typically return values are 1 and greater. For example, the time 00:45 is in the first hour of the day, and for components hour and day respectively, the result would be 1.
+	/// An exception is the week-in-month calculation, which returns 0 for days before the first week in the month containing the date.
 	/// - Note:
 	///        Some computations can take a relatively long time.
 	/// - Parameters:
@@ -313,7 +313,7 @@ public extension Date {
 	///   - larger: The larger calendar component.
 	///   - calendar: The calendar to use
 	/// - Returns: The ordinal number of smaller within larger at the time specified by date.
-    /// Returns nil if larger is not logically bigger than smaller in the calendar, or the given combination of components does not make sense (or is a computation which is undefined).
+	/// Returns nil if larger is not logically bigger than smaller in the calendar, or the given combination of components does not make sense (or is a computation which is undefined).
 	func ordinality(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Int? {
 		calendar.ordinality(of: smaller, in: larger, for: self)
 	}
@@ -338,9 +338,9 @@ public extension Date {
 			return addingTimeInterval(to.timeIntervalSince(from))
 		case let .components(components):
 			return calendar.date(
-                byAdding: DateComponents(rawValue: components),
-                to: self, wrappingComponents: wrapping
-            ) ?? addingTimeInterval(TimeInterval(difference.seconds))
+				byAdding: DateComponents(rawValue: components),
+				to: self, wrappingComponents: wrapping
+			) ?? addingTimeInterval(TimeInterval(difference.seconds))
 		}
 	}
 
@@ -350,11 +350,11 @@ public extension Date {
 
 	func adding(_ component: Calendar.Component, value: Int, wrapping: Bool = false, calendar: Calendar = .default) -> Date {
 		calendar.date(
-            byAdding: component,
-            value: value,
-            to: self,
-            wrappingComponents: wrapping
-        ) ?? addingTimeInterval(TimeInterval(value * number(of: .second, in: component)))
+			byAdding: component,
+			value: value,
+			to: self,
+			wrappingComponents: wrapping
+		) ?? addingTimeInterval(TimeInterval(value * number(of: .second, in: component)))
 	}
 
 	func setting(_ components: DateComponents, calendar: Calendar = .default) -> Date {
@@ -389,11 +389,11 @@ public extension Date {
 	}
 
 	func next(
-        _ component: Calendar.Component,
-        direction: Calendar.SearchDirection = .forward,
-        count: Int = 1,
-        calendar: Calendar = .default
-    ) -> Date {
+		_ component: Calendar.Component,
+		direction: Calendar.SearchDirection = .forward,
+		count: Int = 1,
+		calendar: Calendar = .default
+	) -> Date {
 		switch direction {
 		case .forward:
 			return calendar.date(byAdding: component, value: count, to: self)?.start(of: component, calendar: calendar) ?? self
@@ -404,11 +404,11 @@ public extension Date {
 	}
 
 	func nearest(
-        _ components: DateComponents,
-        in time: Calendar.SearchDirection.Set = .both,
-        matchingPolicy: Calendar.MatchingPolicy = .strict,
-        calendar: Calendar = .default
-    ) -> Date? {
+		_ components: DateComponents,
+		in time: Calendar.SearchDirection.Set = .both,
+		matchingPolicy: Calendar.MatchingPolicy = .strict,
+		calendar: Calendar = .default
+	) -> Date? {
 		guard !time.isEmpty else { return nil }
 		var next: Date?
 		var prev: Date?

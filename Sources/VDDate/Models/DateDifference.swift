@@ -143,11 +143,11 @@ public enum DateDifference: Hashable, Equatable, Comparable, ExpressibleByDictio
 	}
 
 	fileprivate static func operation(
-        _ lhs: DateDifference,
-        _ rhs: DateDifference,
-        _ block1: (TimeInterval, TimeInterval) -> TimeInterval,
-        _ block2: (Int, Int) -> Int
-    ) -> DateDifference {
+		_ lhs: DateDifference,
+		_ rhs: DateDifference,
+		_ block1: (TimeInterval, TimeInterval) -> TimeInterval,
+		_ block2: (Int, Int) -> Int
+	) -> DateDifference {
 		switch (lhs, rhs) {
 		case let (.components(left), .components(right)):
 			var result = left
@@ -167,11 +167,11 @@ public enum DateDifference: Hashable, Equatable, Comparable, ExpressibleByDictio
 	}
 
 	fileprivate static func operation(
-        _ lhs: DateDifference,
-        _ rhs: Int,
-        _ block1: (TimeInterval, TimeInterval) -> TimeInterval,
-        _ block2: (Int, Int) -> Int
-    ) -> DateDifference {
+		_ lhs: DateDifference,
+		_ rhs: Int,
+		_ block1: (TimeInterval, TimeInterval) -> TimeInterval,
+		_ block2: (Int, Int) -> Int
+	) -> DateDifference {
 		switch lhs {
 		case let .interval(interval):
 			return .interval(block1(interval, TimeInterval(rhs)))
@@ -183,20 +183,20 @@ public enum DateDifference: Hashable, Equatable, Comparable, ExpressibleByDictio
 	}
 
 	fileprivate static func operation(
-        _ operation: (Int, Int) -> Int,
-        _ lhs: DateDifference,
-        _ rhs: Int,
-        at keyPath: KeyPath<DateDifference, Int>
-    ) -> Int {
+		_ operation: (Int, Int) -> Int,
+		_ lhs: DateDifference,
+		_ rhs: Int,
+		at keyPath: KeyPath<DateDifference, Int>
+	) -> Int {
 		operation(lhs[keyPath: keyPath], rhs)
 	}
 
 	fileprivate static func operation(
-        _ operation: (Int, Int) -> Int,
-        _ lhs: DateDifference,
-        _ rhs: DateDifference,
-        at keyPath: KeyPath<DateDifference, Int>
-    ) -> Int {
+		_ operation: (Int, Int) -> Int,
+		_ lhs: DateDifference,
+		_ rhs: DateDifference,
+		at keyPath: KeyPath<DateDifference, Int>
+	) -> Int {
 		operation(lhs[keyPath: keyPath], rhs[keyPath: keyPath])
 	}
 }
