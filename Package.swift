@@ -4,17 +4,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "VDDate",
-    products: [
-        .library(name: "VDDate", targets: ["VDDate"]),
-    ],
-    dependencies: [
-    ],
-    targets: [
-        .target(
-            name: "VDDate",
-            dependencies: [
-            ]
-        )
-    ]
+	name: "VDDate",
+	products: [
+		.library(name: "VDDate", targets: ["VDDate"]),
+	],
+	dependencies: [
+	],
+	targets: [
+		.target(
+			name: "VDDate",
+			dependencies: [
+			]
+		),
+	]
 )
