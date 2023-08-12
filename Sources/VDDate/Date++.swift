@@ -126,7 +126,7 @@ public extension Date {
 	/// - Returns: The value for the component.
 	subscript(_ component: Calendar.Component, calendar calendar: Calendar = .default) -> Int {
 		get { calendar.component(component, from: self) }
-		set { self = setting(newValue, component, calendar: calendar) ?? self }
+		set { self = setting(component, newValue, calendar: calendar) ?? self }
 	}
 
 	/// Returns the first moment of a given Date, as a Date.
@@ -153,10 +153,10 @@ public extension Date {
 	///   - accuracy: The component to compute for
 	///   - calendar: The calendar to use
 	/// - Returns: The last moment of the given date.
-	func end(of component: Calendar.Component, accuracy: Calendar.Component? = nil, calendar: Calendar = .default) -> Date {
+	func end(of component: Calendar.Component, toGranularity: Calendar.Component? = nil, calendar: Calendar = .default) -> Date {
 		guard component > .second else { return self }
 		var smaller: Calendar.Component?
-		if let smallest = accuracy, calendar.range(of: smallest, in: component, for: self) != nil {
+		if let smallest = toGranularity, calendar.range(of: smallest, in: component, for: self) != nil {
 			if smallest == .nanosecond {
 				smaller = .second
 			} else {
@@ -213,20 +213,20 @@ public extension Date {
 		calendar.range(of: smaller, in: larger, for: self)
 	}
 
-	func range(byAdding difference: DateDifference, calendar: Calendar = .default) -> Range<Date> {
+	func range(byAdding difference: DateDifference, calendar: Calendar = .default) -> DateInterval {
 		let new = adding(difference)
 		if new <= self {
-			return new ..< self
+			return DateInterval(start: new, end: self)
 		} else {
-			return self ..< new
+			return DateInterval(start: self, end: new)
 		}
 	}
 
-	func dates(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Range<Date>? {
+	func dates(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> DateInterval? {
 		let lower = start(of: larger, calendar: calendar)
-		let upper = end(of: larger, accuracy: smaller, calendar: calendar)
+		let upper = end(of: larger, toGranularity: smaller, calendar: calendar)
 		guard upper > lower else { return nil }
-		return lower ..< upper
+		return DateInterval(start: lower, end: upper)
 	}
 
 	func number(of smaller: Calendar.Component, calendar: Calendar = .default) -> Int {
@@ -343,8 +343,8 @@ public extension Date {
 	///   - calendar: The calendar to use
 	/// - Returns: The ordinal number of smaller within larger at the time specified by date.
 	/// Returns nil if larger is not logically bigger than smaller in the calendar, or the given combination of components does not make sense (or is a computation which is undefined).
-	func ordinality(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Int? {
-		calendar.ordinality(of: smaller, in: larger, for: self)
+	func ordinality(of smaller: Calendar.Component, in bigger: Calendar.Component, calendar: Calendar = .default) -> Int? {
+		calendar.ordinality(of: smaller, in: bigger, for: self)
 	}
 
 	func from(_ other: Date) -> DateDifference {
@@ -388,11 +388,11 @@ public extension Date {
 
 	func setting(_ components: DateComponents, calendar: Calendar = .default) -> Date {
 		components.rawValue.sorted(by: { $0.key > $1.key }).reduce(self) {
-			$0.setting($1.value, $1.key) ?? $0
+			$0.setting($1.key, $1.value) ?? $0
 		}
 	}
 
-	func setting(_ value: Int, _ component: Calendar.Component, calendar: Calendar = .default) -> Date? {
+	func setting(_ component: Calendar.Component, _ value: Int, calendar: Calendar = .default) -> Date? {
 		switch component {
 		case .nanosecond, .second, .minute, .hour:
 			var comps = components(calendar: calendar)
@@ -408,7 +408,7 @@ public extension Date {
 		}
 	}
 
-	func compare(with date: Date, accuracy component: Calendar.Component, calendar: Calendar = .default) -> ComparisonResult {
+	func compare(with date: Date, toGranularity component: Calendar.Component, calendar: Calendar = .default) -> ComparisonResult {
 		calendar.compare(self, to: date, toGranularity: component)
 	}
 
@@ -454,17 +454,17 @@ public extension Date {
 	}
 
 	func rounded(_ component: Calendar.Component, by value: Int, calendar: Calendar = .default) -> Date {
-		guard value > 0 else { return setting(value, component, calendar: calendar) ?? self }
+		guard value > 0 else { return self }
 		var count = self[component, calendar: calendar]
 		count = Int(Foundation.round(Double(count) / Double(value))) * value
-		return setting(count, component, calendar: calendar) ?? self
+		return (setting(component, count, calendar: calendar) ?? self).start(of: component, calendar: calendar)
 	}
 
-	func rounded(_ component: Calendar.Component, from date: Date, by value: Int, calendar: Calendar = .default) -> Date {
-		guard value > 0 else { return setting(value, component, calendar: calendar) ?? self }
+	func rounded(_ component: Calendar.Component, by value: Int, from date: Date, calendar: Calendar = .default) -> Date {
+		guard value > 0 else { return self }
 		var count = number(of: component, from: date, calendar: calendar)
 		count = Int(Foundation.round(Double(count) / Double(value))) * value
-		return date + .components([component: count])
+		return (date + .components([component: count])).start(of: component, calendar: calendar)
 	}
 }
 

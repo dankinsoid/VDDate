@@ -53,10 +53,7 @@ public struct DateFormat: ExpressibleByArrayLiteral, ExpressibleByStringInterpol
 		public var format: String {
 			switch self {
 			case let .string(string):
-				if
-					!string.isEmpty && DateFormat.Component.characterSet.contains(string[string.startIndex]) ||
-					string.count > 1 && DateFormat.Component.characterSet.contains(string[string.index(before: string.endIndex)])
-				{
+				if string.contains(where: \.isLetter) {
 					return "'\(string)'"
 				} else {
 					return string
