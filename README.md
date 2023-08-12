@@ -1,9 +1,9 @@
-# ${NAME}
+# VDDate
 
-[![CI Status](https://img.shields.io/travis/dankinsoid/${NAME}.svg?style=flat)](https://travis-ci.org/dankinsoid/${NAME})
-[![Version](https://img.shields.io/cocoapods/v/${NAME}.svg?style=flat)](https://cocoapods.org/pods/${NAME})
-[![License](https://img.shields.io/cocoapods/l/${NAME}.svg?style=flat)](https://cocoapods.org/pods/${NAME})
-[![Platform](https://img.shields.io/cocoapods/p/${NAME}.svg?style=flat)](https://cocoapods.org/pods/${NAME})
+[![CI Status](https://img.shields.io/travis/dankinsoid/VDDate.svg?style=flat)](https://travis-ci.org/dankinsoid/VDDate)
+[![Version](https://img.shields.io/cocoapods/v/VDDate.svg?style=flat)](https://cocoapods.org/pods/VDDate)
+[![License](https://img.shields.io/cocoapods/l/VDDate.svg?style=flat)](https://cocoapods.org/pods/VDDate)
+[![Platform](https://img.shields.io/cocoapods/p/VDDate.svg?style=flat)](https://cocoapods.org/pods/VDDate)
 
 
 ## Description
@@ -29,10 +29,10 @@ import PackageDescription
 let package = Package(
   name: "SomeProject",
   dependencies: [
-    .package(url: "https://github.com/dankinsoid/${NAME}.git", from: "0.0.1")
+    .package(url: "https://github.com/dankinsoid/VDDate.git", from: "0.0.1")
   ],
   targets: [
-    .target(name: "SomeProject", dependencies: ["${NAME}"])
+    .target(name: "SomeProject", dependencies: ["VDDate"])
   ]
 )
 ```
@@ -44,7 +44,7 @@ $ swift build
 
 Add the following line to your Podfile:
 ```ruby
-pod '${NAME}'
+pod 'VDDate'
 ```
 and run `pod update` from the podfile directory first.
 
@@ -54,4 +54,4 @@ dankinsoid, voidilov@gmail.com
 
 ## License
 
-${NAME} is available under the MIT license. See the LICENSE file for more info.
+VDDate is available under the MIT license. See the LICENSE file for more info.

@@ -4,18 +4,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "${NAME}",
-    platforms: [
-        .iOS(.v13),
-    ],
+    name: "VDDate",
     products: [
-        .library(name: "${NAME}", targets: ["${NAME}"]),
+        .library(name: "VDDate", targets: ["VDDate"]),
     ],
     dependencies: [
     ],
     targets: [
         .target(
-            name: "${NAME}",
+            name: "VDDate",
             dependencies: [
             ]
         )
