@@ -213,7 +213,7 @@ public extension Date {
 		calendar.range(of: smaller, in: larger, for: self)
 	}
 
-	func range(byAdding difference: DateDifference, calendar: Calendar = .default) -> DateInterval {
+	func interval(byAdding difference: DateDifference, calendar: Calendar = .default) -> DateInterval {
 		let new = adding(difference)
 		if new <= self {
 			return DateInterval(start: new, end: self)
@@ -222,7 +222,7 @@ public extension Date {
 		}
 	}
 
-	func dates(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> DateInterval? {
+	func interval(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> DateInterval? {
 		let lower = start(of: larger, calendar: calendar)
 		let upper = end(of: larger, toGranularity: smaller, calendar: calendar)
 		guard upper > lower else { return nil }
