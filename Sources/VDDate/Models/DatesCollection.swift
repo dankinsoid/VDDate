@@ -35,14 +35,14 @@ public struct DatesCollection: Collection, RandomAccessCollection {
 @available(iOS 10.0, macOS 10.12, *)
 public extension DateInterval {
 
-	func each(_ component: Calendar.Component, step: Int = 1, calendar: Calendar = .default) -> DatesCollection {
-		(start ..< end).each(component, step: step, calendar: calendar)
+	func each(_ step: Int = 1, _ component: Calendar.Component, calendar: Calendar = .default) -> DatesCollection {
+		(start ..< end).each(step, component, calendar: calendar)
 	}
 }
 
 public extension ClosedRange where Bound == Date {
 
-	func each(_ component: Calendar.Component, step: Int = 1, calendar: Calendar = .default) -> DatesCollection {
+	func each(_ step: Int = 1, _ component: Calendar.Component, calendar: Calendar = .default) -> DatesCollection {
 		let count = upperBound.number(of: component, from: lowerBound) + 1
 		return DatesCollection(from: lowerBound, count: count, component: component, step: step, calendar: calendar)
 	}
@@ -50,7 +50,7 @@ public extension ClosedRange where Bound == Date {
 
 public extension Range where Bound == Date {
 
-	func each(_ component: Calendar.Component, step: Int = 1, calendar: Calendar = .default) -> DatesCollection {
+	func each(_ step: Int = 1, _ component: Calendar.Component, calendar: Calendar = .default) -> DatesCollection {
 		let count = upperBound.number(of: component, from: lowerBound)
 		return DatesCollection(from: lowerBound, count: count, component: component, step: step, calendar: calendar)
 	}

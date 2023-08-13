@@ -16,6 +16,10 @@ extension Calendar.Component: CaseIterable, Comparable {
 		[.year, .month, .day, .hour, .minute, .second, .weekday, .weekdayOrdinal, .quarter, .weekOfMonth, .weekOfYear, .yearForWeekOfYear, .nanosecond, .calendar, .timeZone, .era]
 	}
 
+	public static var allMinimalCases: Set<Calendar.Component> {
+		[.year, .month, .day, .hour, .minute, .second, .nanosecond]
+	}
+
 	public var first: Int {
 		switch self {
 		case .era, .year, .month, .day, .weekday, .weekOfYear, .weekOfMonth, .weekdayOrdinal, .yearForWeekOfYear:
@@ -79,33 +83,32 @@ extension Calendar.Component: CaseIterable, Comparable {
 		}
 	}
 
-	public var inSeconds: TimeInterval {
+	var inSeconds: TimeInterval? {
 		switch self {
-		case .era: return .infinity
-		case .year: return 365.2425 * Calendar.Component.day.inSeconds
-		case .month: return Calendar.Component.year.inSeconds / 12
-		case .day: return 24 * Calendar.Component.hour.inSeconds
-		case .hour: return 60 * Calendar.Component.minute.inSeconds
-		case .minute: return 60
+		case .era: return nil
+		case .year, .yearForWeekOfYear: return Calendar.Component.day.inSeconds.map { 365.2425 * $0 }
+		case .month: return Calendar.Component.year.inSeconds.map { $0 / 12 }
+		case .day: return Calendar.Component.hour.inSeconds.map { 24 * $0 }
+		case .hour: return Calendar.Component.minute.inSeconds.map { 60 * $0 }
+		case .minute: return Calendar.Component.second.inSeconds.map { $0 * 60 }
 		case .second: return 1
 		case .weekday: return Calendar.Component.day.inSeconds
 		case .weekdayOrdinal: return Calendar.Component.day.inSeconds
-		case .quarter: return 4 * Calendar.Component.month.inSeconds
-		case .weekOfMonth: return 7 * Calendar.Component.day.inSeconds
-		case .weekOfYear: return 7 * Calendar.Component.day.inSeconds
-		case .yearForWeekOfYear: return Calendar.Component.year.inSeconds
-		case .nanosecond: return 1 / 1_000_000_000
-		case .calendar: return .infinity
-		case .timeZone: return .infinity
-		@unknown default: return .infinity
+		case .quarter: return Calendar.Component.month.inSeconds.map { 4 * $0 }
+		case .weekOfMonth, .weekOfYear: return Calendar.Component.day.inSeconds.map { 7 * $0 }
+		case .nanosecond: return Calendar.Component.second.inSeconds.map { $0 / 1_000_000_000 }
+		case .calendar: return nil
+		case .timeZone: return nil
+		@unknown default: return nil
 		}
 	}
 
-	public func `as`(_ component: Calendar.Component) -> Double {
-		guard component != .second else { return inSeconds }
+	public func `as`(_ component: Calendar.Component) -> Double? {
+		guard component != .second else { return inSeconds ?? 1 }
 		let other = component.inSeconds
-		guard other != .infinity, other != 0 else { return 0 }
-		return inSeconds / other
+		guard other != 0 else { return 0 }
+		guard let other else { return nil }
+		return inSeconds.map { $0 / other }
 	}
 
 	public static func < (lhs: Calendar.Component, rhs: Calendar.Component) -> Bool {

@@ -3,8 +3,8 @@ import Foundation
 public extension Date {
 
 	static var today: Date { Date().start(of: .day) }
-	static var yesterday: Date { today - .day }
-	static var tomorrow: Date { today + .day }
+	static var yesterday: Date { today - 1.days }
+	static var tomorrow: Date { today + 1.days }
 }
 
 public extension Date {
@@ -115,8 +115,8 @@ public extension Date {
 	/// - Parameters:
 	///   - calendar: The calendar to use for extracting the components.
 	/// - Returns: The components of the date.
-	func components(calendar: Calendar) -> DateComponents {
-		calendar.dateComponents(Calendar.Component.allCases, from: self)
+	func components(_ set: Set<Calendar.Component> = Calendar.Component.allCases, calendar: Calendar) -> DateComponents {
+		calendar.dateComponents(set, from: self)
 	}
 
 	/// Returns the value for one component of a date.
@@ -150,7 +150,7 @@ public extension Date {
 	/// For example, pass in `.day`, if you want the start of today.
 	/// - Parameters:
 	///   - component: The component to compute for
-	///   - accuracy: The component to compute for
+	///   - toGranularity: The component to compute for
 	///   - calendar: The calendar to use
 	/// - Returns: The last moment of the given date.
 	func end(of component: Calendar.Component, toGranularity: Calendar.Component? = nil, calendar: Calendar = .default) -> Date {
@@ -172,10 +172,10 @@ public extension Date {
 		return calendar.date(byAdding: components, to: start(of: component, calendar: calendar)) ?? self
 	}
 
-	func matches(_ components: DateComponents, calendar: Calendar = .default) -> Bool {
+	func matches(_ components: DateComponents, calendar: Calendar? = nil) -> Bool {
 		for component in Calendar.Component.allCases {
 			guard let value = components[component] else { continue }
-			if calendar.component(component, from: self) != value {
+			if (calendar ?? components.calendar ?? .default).component(component, from: self) != value {
 				print(component, value)
 				return false
 			}
@@ -201,6 +201,7 @@ public extension Date {
 		calendar.isDate(self, equalTo: date, toGranularity: toGranularity)
 	}
 
+	/// Returns the number of given component from a given date.
 	func number(of component: Calendar.Component, from date: Date, calendar: Calendar = .default) -> Int {
 		calendar.dateComponents(
 			[component],
@@ -209,11 +210,29 @@ public extension Date {
 		)[component] ?? 0
 	}
 
+	/// Returns the number of given component from a given date.
+	func numbers(of components: Set<Calendar.Component> = Calendar.Component.allCases, from start: Date, calendar: Calendar = .default) -> DateComponents {
+		DateComponents(
+			rawValue: Dictionary(
+				components.map {
+					($0, number(of: $0, from: start, calendar: calendar))
+				},
+				uniquingKeysWith: { _, s in s }
+			),
+			calendar: calendar
+		)
+	}
+
+	/// Returns the difference between two dates.
+	func components(_ components: Set<Calendar.Component> = Calendar.Component.allMinimalCases, from date: Date, calendar: Calendar = .default) -> DateComponents {
+		calendar.dateComponents(components, from: date, to: self)
+	}
+
 	func range(of smaller: Calendar.Component, in larger: Calendar.Component, calendar: Calendar = .default) -> Range<Int>? {
 		calendar.range(of: smaller, in: larger, for: self)
 	}
 
-	func interval(byAdding difference: DateDifference, calendar: Calendar = .default) -> DateInterval {
+	func interval(byAdding difference: DateComponents, calendar: Calendar = .default) -> DateInterval {
 		let new = adding(difference)
 		if new <= self {
 			return DateInterval(start: new, end: self)
@@ -238,7 +257,7 @@ public extension Date {
 			return range(of: smaller, in: larger, calendar: calendar)?.count ?? 0
 		} else {
 			let from = start(of: larger, calendar: calendar)
-			return from.adding(larger, value: 1, calendar: calendar).number(of: smaller, from: from, calendar: calendar)
+			return from.adding(1, larger, calendar: calendar).number(of: smaller, from: from, calendar: calendar)
 		}
 	}
 
@@ -275,8 +294,10 @@ public extension Date {
 		timeZone: TimeZone = .default,
 		calendar: Calendar = .default
 	) -> String {
-		guard !format.relativeFormats.isEmpty else { return string(format.defaultFormat, locale: locale, timeZone: timeZone) }
-		let difference = from(date).dateComponents(calendar: calendar)
+		guard !format.relativeFormats.isEmpty else {
+			return string(format.defaultFormat, locale: locale, timeZone: timeZone)
+		}
+		let difference = numbers(of: Set(format.relativeFormats.flatMap(\.key.rawValue.keys)), from: date, calendar: calendar)
 		for (comp, format) in format.relativeFormats.sorted(by: { $0.key.minComponent() < $1.key.minComponent() }) {
 			if difference.contains(comp) {
 				return string(format, locale: locale, timeZone: timeZone)
@@ -347,37 +368,16 @@ public extension Date {
 		calendar.ordinality(of: smaller, in: bigger, for: self)
 	}
 
-	func from(_ other: Date) -> DateDifference {
-		.dates(from: other, to: self)
+	static func - (_ lhs: Date, _ rhs: Date) -> TimeInterval {
+		lhs.timeIntervalSince(rhs)
 	}
 
-	func to(_ other: Date) -> DateDifference {
-		other.from(self)
+	func adding(_ components: DateComponents, wrapping: Bool = false, calendar: Calendar? = nil) -> Date {
+		(calendar ?? components.calendar ?? .default).date(byAdding: components, to: self, wrappingComponents: wrapping)
+			?? Date(timeInterval: components.inSeconds, since: self)
 	}
 
-	static func - (_ lhs: Date, _ rhs: Date) -> DateDifference {
-		lhs.from(rhs)
-	}
-
-	func adding(_ difference: DateDifference, wrapping: Bool = false, calendar: Calendar = .default) -> Date {
-		switch difference {
-		case let .interval(interval):
-			return addingTimeInterval(interval)
-		case let .dates(from, to):
-			return addingTimeInterval(to.timeIntervalSince(from))
-		case let .components(components):
-			return calendar.date(
-				byAdding: DateComponents(rawValue: components),
-				to: self, wrappingComponents: wrapping
-			) ?? addingTimeInterval(TimeInterval(difference.seconds))
-		}
-	}
-
-	func adding(components: DateComponents, wrapping: Bool = false, calendar: Calendar = .default) -> Date? {
-		calendar.date(byAdding: components, to: self, wrappingComponents: wrapping)
-	}
-
-	func adding(_ component: Calendar.Component, value: Int, wrapping: Bool = false, calendar: Calendar = .default) -> Date {
+	func adding(_ value: Int, _ component: Calendar.Component, wrapping: Bool = false, calendar: Calendar = .default) -> Date {
 		calendar.date(
 			byAdding: component,
 			value: value,
@@ -386,9 +386,9 @@ public extension Date {
 		) ?? addingTimeInterval(TimeInterval(value * number(of: .second, in: component)))
 	}
 
-	func setting(_ components: DateComponents, calendar: Calendar = .default) -> Date {
+	func setting(_ components: DateComponents, calendar: Calendar? = nil) -> Date {
 		components.rawValue.sorted(by: { $0.key > $1.key }).reduce(self) {
-			$0.setting($1.key, $1.value) ?? $0
+			$0.setting($1.key, $1.value, calendar: calendar ?? components.calendar ?? .default) ?? $0
 		}
 	}
 
@@ -400,7 +400,7 @@ public extension Date {
 			return calendar.date(from: comps)
 		case .day, .weekday, .weekdayOrdinal, .weekOfYear, .weekOfMonth, .era, .month, .quarter, .year, .yearForWeekOfYear:
 			let diff = value - self[component, calendar: calendar]
-			return adding(component, value: diff, calendar: calendar)
+			return adding(diff, component, calendar: calendar)
 		case .calendar, .timeZone:
 			return nil
 		@unknown default:
@@ -436,9 +436,10 @@ public extension Date {
 		_ components: DateComponents,
 		in time: Calendar.SearchDirection.Set = .both,
 		matchingPolicy: Calendar.MatchingPolicy = .strict,
-		calendar: Calendar = .default
+		calendar: Calendar? = nil
 	) -> Date? {
 		guard !time.isEmpty else { return nil }
+		let calendar = calendar ?? components.calendar ?? .default
 		var next: Date?
 		var prev: Date?
 		if time.contains(.future) {
@@ -464,7 +465,7 @@ public extension Date {
 		guard value > 0 else { return self }
 		var count = number(of: component, from: date, calendar: calendar)
 		count = Int(Foundation.round(Double(count) / Double(value))) * value
-		return (date + .components([component: count])).start(of: component, calendar: calendar)
+		return (date + [component: count]).start(of: component, calendar: calendar)
 	}
 }
 

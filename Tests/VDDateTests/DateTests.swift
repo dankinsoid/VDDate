@@ -251,6 +251,7 @@ final class DateTests: XCTestCase {
 
 	func testStringRelative() {
 		Calendar.default = calendar
+		TimeZone.default = gmt
 		Locale.default = Locale(identifier: "en_US")
 		let testableDate = Date(timeIntervalSince1970: 1_691_843_633)
 		let format = RelativeDateFormat(
@@ -276,7 +277,7 @@ final class DateTests: XCTestCase {
 			"Yesterday"
 		)
 		XCTAssertEqual(
-			testableDate.string(format, to: Date(timeIntervalSince1970: 1_691_447_633)),
+			testableDate.string(format, to: Date(timeIntervalSince1970: 1_691_698_660)),
 			"Saturday"
 		)
 		XCTAssertEqual(
@@ -304,34 +305,30 @@ final class DateTests: XCTestCase {
 		XCTAssertEqual(testableDate.ordinality(of: .day, in: .week), 7)
 	}
 
-	func testFromDate() {
+	func testComponentsFromDate() {
 		Calendar.default = calendar
+		TimeZone.default = gmt
 		let testableDate = Date(timeIntervalSince1970: 1_691_843_633)
-		XCTAssertEqual(testableDate.from(Date(timeIntervalSince1970: 1_691_757_233)), 1.days)
-		XCTAssertEqual(testableDate.from(Date(timeIntervalSince1970: 1_691_757_232)), [.day: 1, .second: 1])
-		XCTAssertEqual(testableDate.from(Date(timeIntervalSince1970: 1_723_379_632)), [.day: 1, .second: 1, .year: -1])
-	}
 
-	func testToDate() {
-		Calendar.default = calendar
-		let testableDate = Date(timeIntervalSince1970: 1_691_843_633)
-		XCTAssertEqual(testableDate.to(Date(timeIntervalSince1970: 1_691_757_233)), -1.days)
-		XCTAssertEqual(testableDate.to(Date(timeIntervalSince1970: 1_691_757_232)), [.day: -1, .second: -1])
-		XCTAssertEqual(testableDate.to(Date(timeIntervalSince1970: 1_723_379_632)), [.day: -1, .second: -1, .year: 1])
+		let date1 = Date(timeIntervalSince1970: 1_691_757_233)
+		XCTAssertEqual(date1.adding(testableDate.components(from: date1)), testableDate)
+		let date2 = Date(timeIntervalSince1970: 1_691_757_233)
+		XCTAssertEqual(date2.adding(testableDate.components(from: date2)), testableDate)
+		let date3 = Date(timeIntervalSince1970: 1_723_379_632)
+		XCTAssertEqual(testableDate.adding(date3.components(from: testableDate)), date3)
 	}
 
 	func testSubtract() {
 		Calendar.default = calendar
 		let date1 = Date(timeIntervalSince1970: 1_691_843_633)
 		let date2 = Date(timeIntervalSince1970: 1_723_379_632)
-		XCTAssertEqual(date2 - date1, [.day: -1, .second: -1, .year: 1])
+		XCTAssertEqual(date2 - date1, 31_535_999.0)
 	}
 
 	func testAdd() {
 		Calendar.default = calendar
 		let testableDate = Date(timeIntervalSince1970: 1_691_843_633)
 		XCTAssertEqual(testableDate.adding([.day: -1, .second: -1, .year: 1]), Date(timeIntervalSince1970: 1_723_379_632))
-		XCTAssertEqual(testableDate.adding(components: [.day: -1, .second: -1, .year: 1]), Date(timeIntervalSince1970: 1_723_379_632))
 	}
 
 	func testSetting() {
