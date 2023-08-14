@@ -28,11 +28,11 @@ VDDate is a Swift library that offers a robust set of extensions for the Date st
 - `string(format: RelativeDateFormat<DateFormat>)` - method for converting formatting date relative to current (or any other) date, example:
 ```swift
 date.string(
-  RelativeDateFormat(.iso8601)
-    .at(.day(-1), "'Yesterday'")
-    .at(.day(0), "'Today'")
-    .at(.week(0), [.weekday])
-    .at(.year(0), "dd.MM")
+  RelativeDateFormat(.iso8601) // default format
+    .at(.day(-1), "'Yesterday'") // format for yesterday date
+    .at(.day(0), "'Today'") // format for today date
+    .at(.week(0), [.weekday]) // format for this week date
+    .at(.year(0), "dd.MM") // format for this year date
 )
 ```
 Note: Deprecated since iOS 15.0 in favor of `formatted(RelativeDateFormatStyle)`
