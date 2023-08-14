@@ -23,8 +23,8 @@ VDDate is a Swift library that offers a robust set of extensions for the Date st
 - `number(of: Calendar.Component) -> Int`
 - `number(of: Calendar.Component, in: Calendar.Component) -> Int`
 - `DateFormat` struct with predefined format components.
-- `string(DateFormat) -> String`.
-- `string(date: DateFormatter.Style, time: DateFormatter.Style) -> String`.
+- `string(DateFormat) -> String` Note: Deprecated since iOS 15.0 in favor of `formatted(FormatStyle)`.
+- `string(date: DateFormatter.Style, time: DateFormatter.Style) -> String` Note: Deprecated since iOS 15.0 in favor of `formatted(FormatStyle)`.
 - `string(format: RelativeDateFormat<DateFormat>)` - method for converting formatting date relative to current (or any other) date, example:
 ```swift
 date.string(
@@ -35,6 +35,8 @@ date.string(
     .at(.year(0), "dd.MM")
 )
 ```
+Note: Deprecated since iOS 15.0 in favor of `formatted(RelativeDateFormatStyle)`
+- `formatted(RelativeDateFormatStyle)`
 - `name(of: Calendar.Component) -> String`
 - `ordinality(of: Calendar.Component, in: Calendar.Component) -> Int?` and convenience methods for each component like `day(in: Calendar.Component)`.
 - Minus operator for date returns TimeInterval.
