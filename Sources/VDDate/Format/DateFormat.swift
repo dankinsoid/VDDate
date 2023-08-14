@@ -1,5 +1,9 @@
 import Foundation
 
+@available(macOS, deprecated: 12.0, message: "use Date.FormatString")
+@available(iOS, deprecated: 15.0, message: "use Date.FormatString")
+@available(tvOS, deprecated: 15.0, message: "use Date.FormatString")
+@available(watchOS, deprecated: 8.0, message: "use Date.FormatString")
 public struct DateFormat: ExpressibleByArrayLiteral, ExpressibleByStringInterpolation, Hashable, Codable, CustomStringConvertible {
 
 	public var string: String

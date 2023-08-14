@@ -254,38 +254,35 @@ final class DateTests: XCTestCase {
 		TimeZone.default = gmt
 		Locale.default = Locale(identifier: "en_US")
 		let testableDate = Date(timeIntervalSince1970: 1_691_843_633)
-		let format = RelativeDateFormat(
-			"dd.MM.yyyy",
-			relative: [
-				.day(-1): "'Yesterday'",
-				.day(0): "'Today'",
-				.day(1): "'Tomorrow'",
-				.week(0): [.weekday],
-				.year(0): "dd.MM",
-			]
-		)
+		let format = RelativeDateFormat<DateFormat>("dd.MM.yyyy")
+			.at(.day(-1), "'Yesterday'")
+			.at(.day(0), "'Today'")
+			.at(.day(1), "'Tomorrow'")
+			.at(.week(0), [.weekday])
+			.at(.year(0), "dd.MM")
+
 		XCTAssertEqual(
-			testableDate.string(format, to: testableDate),
+			testableDate.string(format: format, relativeTo: testableDate),
 			"Today"
 		)
 		XCTAssertEqual(
-			testableDate.string(format, to: Date(timeIntervalSince1970: 1_691_793_233)),
+			testableDate.string(format: format, relativeTo: Date(timeIntervalSince1970: 1_691_793_233)),
 			"Tomorrow"
 		)
 		XCTAssertEqual(
-			testableDate.string(format, to: Date(timeIntervalSince1970: 1_691_966_033)),
+			testableDate.string(format: format, relativeTo: Date(timeIntervalSince1970: 1_691_966_033)),
 			"Yesterday"
 		)
 		XCTAssertEqual(
-			testableDate.string(format, to: Date(timeIntervalSince1970: 1_691_698_660)),
+			testableDate.string(format: format, relativeTo: Date(timeIntervalSince1970: 1_691_698_660)),
 			"Saturday"
 		)
 		XCTAssertEqual(
-			testableDate.string(format, to: Date(timeIntervalSince1970: 1_688_769_233)),
+			testableDate.string(format: format, relativeTo: Date(timeIntervalSince1970: 1_688_769_233)),
 			"12.08"
 		)
 		XCTAssertEqual(
-			testableDate.string(format, to: Date(timeIntervalSince1970: 1_625_697_233)),
+			testableDate.string(format: format, relativeTo: Date(timeIntervalSince1970: 1_625_697_233)),
 			"12.08.2023"
 		)
 	}

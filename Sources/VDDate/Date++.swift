@@ -45,17 +45,34 @@ public extension Date {
 		self = date
 	}
 
+	@available(macOS, deprecated: 12.0, message: "use init with Date.FormatString")
+	@available(iOS, deprecated: 15.0, message: "use init with Date.FormatString")
+	@available(tvOS, deprecated: 15.0, message: "use init with Date.FormatString")
+	@available(watchOS, deprecated: 8.0, message: "use init with Date.FormatString")
 	init?(
 		from string: String,
-		format: String,
+		format: DateFormat,
 		locale: Locale = .default,
 		timeZone: TimeZone = .default
 	) {
 		let formatter = DateFormatter()
-		formatter.dateFormat = format
+		formatter.dateFormat = format.string
 		formatter.locale = locale
 		formatter.timeZone = timeZone
 		guard let date = formatter.date(from: string) else { return nil }
+		self = date
+	}
+
+	@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+	init?(
+		from string: String,
+		formatString: Date.FormatString,
+		locale: Locale = .default,
+		calendar: Calendar = .default,
+		timeZone: TimeZone = .default
+	) {
+		let formatter = Date.ParseStrategy(format: formatString, locale: locale, timeZone: timeZone, calendar: calendar)
+		guard let date = try? formatter.parse(string) else { return nil }
 		self = date
 	}
 }
@@ -90,11 +107,16 @@ public extension Date {
 
 	/// A string representing the date and time in ISO 8601 format.
 	var iso8601: String {
-		string(
-			.iso8601,
-			locale: Locale(identifier: "en_US_POSIX"),
-			timeZone: TimeZone(secondsFromGMT: 0) ?? .default
-		)
+		let timeZone = TimeZone(secondsFromGMT: 0) ?? .default
+		if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
+			return formatted(Date.ISO8601FormatStyle(includingFractionalSeconds: true, timeZone: timeZone))
+		} else {
+			return string(
+				.iso8601,
+				locale: Locale(identifier: "en_US_POSIX"),
+				timeZone: timeZone
+			)
+		}
 	}
 }
 
@@ -261,6 +283,10 @@ public extension Date {
 		}
 	}
 
+	@available(macOS, deprecated: 12.0, renamed: "formatted")
+	@available(iOS, deprecated: 15.0, renamed: "formatted")
+	@available(tvOS, deprecated: 15.0, renamed: "formatted")
+	@available(watchOS, deprecated: 8.0, renamed: "formatted")
 	func string(
 		_ format: DateFormat,
 		locale: Locale = .default,
@@ -273,9 +299,13 @@ public extension Date {
 		return formatter.string(from: self)
 	}
 
+	@available(macOS, deprecated: 12.0, renamed: "formatted")
+	@available(iOS, deprecated: 15.0, renamed: "formatted")
+	@available(tvOS, deprecated: 15.0, renamed: "formatted")
+	@available(watchOS, deprecated: 8.0, renamed: "formatted")
 	func string(
 		date: DateFormatter.Style = .short,
-		time: DateFormatter.Style = .none,
+		time: DateFormatter.Style = .short,
 		locale: Locale = .default,
 		timeZone: TimeZone = .default
 	) -> String {
@@ -287,40 +317,42 @@ public extension Date {
 		return formatter.string(from: self)
 	}
 
+	@available(macOS, deprecated: 12.0, renamed: "formatted")
+	@available(iOS, deprecated: 15.0, renamed: "formatted")
+	@available(tvOS, deprecated: 15.0, renamed: "formatted")
+	@available(watchOS, deprecated: 8.0, renamed: "formatted")
 	func string(
-		_ format: RelativeDateFormat,
-		to date: Date = Date(),
+		format: RelativeDateFormat<DateFormat>,
+		relativeTo date: Date = Date(),
 		locale: Locale = .default,
 		timeZone: TimeZone = .default,
 		calendar: Calendar = .default
 	) -> String {
-		guard !format.relativeFormats.isEmpty else {
-			return string(format.defaultFormat, locale: locale, timeZone: timeZone)
+		string(format: format, relativeTo: date, calendar: calendar) {
+			string($0, locale: locale, timeZone: timeZone)
 		}
-		let difference = numbers(of: Set(format.relativeFormats.flatMap(\.key.rawValue.keys)), from: date, calendar: calendar)
-		for (comp, format) in format.relativeFormats.sorted(by: { $0.key.minComponent() < $1.key.minComponent() }) {
-			if difference.contains(comp) {
-				return string(format, locale: locale, timeZone: timeZone)
-			}
-		}
-		return string(format.defaultFormat, locale: locale, timeZone: timeZone)
 	}
 
-	func string(
-		_ format: DateFormat,
-		relative: [DateComponents: DateFormat],
-		to date: Date = Date(),
+	@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+	func formatted(
+		_ format: RelativeDateFormatStyle,
+		relativeTo date: Date = Date(),
 		locale: Locale = .default,
 		timeZone: TimeZone = .default,
 		calendar: Calendar = .default
 	) -> String {
-		string(
-			RelativeDateFormat(format, relative: relative),
-			to: date,
-			locale: locale,
-			timeZone: timeZone,
-			calendar: calendar
-		)
+		string(format: format, relativeTo: date, calendar: calendar) {
+			$0.format(self)
+		}
+	}
+
+	private func string<T>(
+		format: RelativeDateFormat<T>,
+		relativeTo date: Date,
+		calendar: Calendar,
+		formatter: (T) -> String
+	) -> String {
+		formatter(format.format(from: date, to: self, calendar: calendar))
 	}
 
 	func name(
