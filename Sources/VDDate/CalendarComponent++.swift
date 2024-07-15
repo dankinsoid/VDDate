@@ -47,6 +47,7 @@ extension Calendar.Component: CaseIterable, Comparable {
 		case .nanosecond: return nil
 		case .calendar: return nil
 		case .timeZone: return nil
+        case .isLeapMonth: return nil
 		@unknown default: return nil
 		}
 	}
@@ -79,7 +80,8 @@ extension Calendar.Component: CaseIterable, Comparable {
 		case .nanosecond: return .second
 		case .calendar: return nil
 		case .timeZone: return nil
-		@unknown default: return nil
+        case .isLeapMonth: return nil
+        @unknown default: return nil
 		}
 	}
 
@@ -99,6 +101,7 @@ extension Calendar.Component: CaseIterable, Comparable {
 		case .nanosecond: return Calendar.Component.second.inSeconds.map { $0 / 1_000_000_000 }
 		case .calendar: return nil
 		case .timeZone: return nil
+        case .isLeapMonth: return nil
 		@unknown default: return nil
 		}
 	}
@@ -136,6 +139,7 @@ extension Calendar.Component: Codable, RawRepresentable, CustomStringConvertible
 		case .nanosecond: return "nanosecond"
 		case .calendar: return "calendar"
 		case .timeZone: return "timeZone"
+        case .isLeapMonth: return "isLeapMonth"
 		@unknown default: return "unknown"
 		}
 	}

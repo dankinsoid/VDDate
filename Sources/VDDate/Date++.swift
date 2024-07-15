@@ -2,7 +2,11 @@ import Foundation
 
 public extension Date {
 
-	static var today: Date { Date().start(of: .day) }
+	/// The current date and time.
+	/// It's possible to mock the current date and time by calling `Date.bootstrap(now:)`.
+	/// So it's recommended to use `Date.now` everywhere in the code instead of `Date()`.
+	static var now: Date { nowBuilder() }
+	static var today: Date { Date.now.start(of: .day) }
 	static var yesterday: Date { today - 1.days }
 	static var tomorrow: Date { today + 1.days }
 }
@@ -32,7 +36,7 @@ public extension Date {
 			minute: minute,
 			second: second,
 			nanosecond: nanosecond
-		).date ?? Date()
+		).date ?? .now
 	}
 
 	init?(
@@ -216,7 +220,7 @@ public extension Date {
 	/// - Parameter calendar: The calendar to use
 	/// - Returns: true if the given date is within current week, as defined by the calendar and calendar’s locale; otherwise, false.
 	func isCurrent(_ component: Calendar.Component, calendar: Calendar = .default) -> Bool {
-		isInSame(component, as: Date(), calendar: calendar)
+		isInSame(component, as: .now, calendar: calendar)
 	}
 
 	func isEqual(to date: Date, toGranularity: Calendar.Component, calendar: Calendar = .default) -> Bool {
@@ -317,13 +321,31 @@ public extension Date {
 		return formatter.string(from: self)
 	}
 
+	///	Returns a string representation of the date relative to another date.
+	///
+	/// - Parameters:
+	///   - format: The format to use
+	///   - date: The date to compare to
+	///   - locale: The locale to use
+	///   - timeZone: The time zone to use
+	///   - calendar: The calendar to use
+	/// - Returns: A string representation of the date.
+	/// ```swift
+	/// date.string(
+	///   RelativeDateFormat(.iso8601)
+	///     .at(.day(-1), "'Yesterday'")
+	///     .at(.day(0), "'Today'")
+	///     .at(.week(0), [.weekday])
+	///     .at(.year(0), "dd.MM")
+	/// )
+	/// ```
 	@available(macOS, deprecated: 12.0, renamed: "formatted")
 	@available(iOS, deprecated: 15.0, renamed: "formatted")
 	@available(tvOS, deprecated: 15.0, renamed: "formatted")
 	@available(watchOS, deprecated: 8.0, renamed: "formatted")
 	func string(
 		format: RelativeDateFormat<DateFormat>,
-		relativeTo date: Date = Date(),
+		relativeTo date: Date = .now,
 		locale: Locale = .default,
 		timeZone: TimeZone = .default,
 		calendar: Calendar = .default
@@ -333,12 +355,19 @@ public extension Date {
 		}
 	}
 
+	///	Returns a string representation of the date relative to another date.
+	///
+	/// - Parameters:
+	///   - format: The format to use
+	///   - date: The date to compare to
+	///   - locale: The locale to use
+	///   - calendar: The calendar to use
+	/// - Returns: A string representation of the date.
 	@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 	func formatted(
 		_ format: RelativeDateFormatStyle,
-		relativeTo date: Date = Date(),
+		relativeTo date: Date = .now,
 		locale: Locale = .default,
-		timeZone: TimeZone = .default,
 		calendar: Calendar = .default
 	) -> String {
 		string(format: format, relativeTo: date, calendar: calendar) {
@@ -377,6 +406,7 @@ public extension Date {
 		case .nanosecond: return "\(nanosecond)"
 		case .calendar: return ""
 		case .timeZone: return string("ZZZZ", locale: locale, timeZone: timeZone)
+		case .isLeapMonth: return ""
 		@unknown default: return ""
 		}
 	}
@@ -433,7 +463,7 @@ public extension Date {
 		case .day, .weekday, .weekdayOrdinal, .weekOfYear, .weekOfMonth, .era, .month, .quarter, .year, .yearForWeekOfYear:
 			let diff = value - self[component, calendar: calendar]
 			return adding(diff, component, calendar: calendar)
-		case .calendar, .timeZone:
+		case .calendar, .timeZone, .isLeapMonth:
 			return nil
 		@unknown default:
 			return nil
@@ -542,4 +572,22 @@ public extension Date {
 	var weekOfMonth: Int { get { self[.weekOfMonth] } set { self[.weekOfMonth] = newValue } }
 	var weekOfYear: Int { get { self[.weekOfYear] } set { self[.weekOfYear] = newValue } }
 	var yearForWeekOfYear: Int { get { self[.yearForWeekOfYear] } set { self[.yearForWeekOfYear] = newValue } }
+}
+
+public extension Date {
+
+	/// Bootstraps the `Date.now` property with a custom builder.
+	static func bootstrap(now builder: @escaping () -> Date) {
+		nowBuilder = builder
+	}
+
+	/// Bootstraps the `Date.now` property with a custom builder.
+	static func bootstrap(now builder: @escaping @autoclosure () -> Date) {
+		bootstrap(now: builder)
+	}
+}
+
+private extension Date {
+
+	static var nowBuilder: () -> Date = { Date() }
 }

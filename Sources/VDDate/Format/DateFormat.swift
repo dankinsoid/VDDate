@@ -296,6 +296,7 @@ public extension DateFormat.Component {
 			case .full, .spellOut: return .component("z", 4)
 			case .narrow: return .component("z", 3)
 			}
+		case .isLeapMonth: return .string("")
 		@unknown default: return .string("")
 		}
 	}

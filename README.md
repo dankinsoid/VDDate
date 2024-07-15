@@ -6,6 +6,7 @@ VDDate is a Swift library that offers a robust set of extensions for the Date st
 ### Date
 - Convenience `Date.init`s with components parameters year, month, day etc.
 - Convenience `Date.init`s from string with format.
+- Static computed property `Date.now` that can be mocked if needed. It's recommended to use `Date.now` instead of `Date()`.
 - Helper vars: `iToday`, `isTomorrow`, `isYesterday`, `iso8601`.
 - var `components`, var for each component: `day`, `month`, `year` etc, mutating subscript with `Calendar.Component`.
 - `start(of: Calendar.Component) -> Date`.
@@ -25,17 +26,7 @@ VDDate is a Swift library that offers a robust set of extensions for the Date st
 - `DateFormat` struct with predefined format components.
 - `string(DateFormat) -> String` Note: Deprecated since iOS 15.0 in favor of `formatted(FormatStyle)`.
 - `string(date: DateFormatter.Style, time: DateFormatter.Style) -> String` Note: Deprecated since iOS 15.0 in favor of `formatted(FormatStyle)`.
-- `string(format: RelativeDateFormat<DateFormat>)` - method for converting formatting date relative to current (or any other) date, example:
-```swift
-date.string(
-  RelativeDateFormat(.iso8601)
-    .at(.day(-1), "'Yesterday'")
-    .at(.day(0), "'Today'")
-    .at(.week(0), [.weekday])
-    .at(.year(0), "dd.MM")
-)
-```
-Note: Deprecated since iOS 15.0 in favor of `formatted(RelativeDateFormatStyle)`
+- `string(format: RelativeDateFormat<DateFormat>)` - method for converting formatting date relative to current (or any other) date. Note: Deprecated since iOS 15.0 in favor of `formatted(RelativeDateFormatStyle)`
 - `formatted(RelativeDateFormatStyle)`
 - `name(of: Calendar.Component) -> String`
 - `ordinality(of: Calendar.Component, in: Calendar.Component) -> Int?` and convenience methods for each component like `day(in: Calendar.Component)`.
@@ -53,6 +44,27 @@ Note: Deprecated since iOS 15.0 in favor of `formatted(RelativeDateFormatStyle)`
 All methods accept a `Calendar` parameter and, in some cases, `TimeZone` or `Locale`.\
 I've introduced static variables: `Calendar.default`, `TimeZone.default`, and `Locale.default`.\
 These variables serve as the default values for each respective method. You can modify each `default` variable either globally or specifically for a given method.
+
+Overload for `Calendar` parameter globally:
+```swift
+Calendar.bootstrap(default: Calendar(identifier: .gregorian))
+```
+Use `Calendar` parameter for a specific method:
+```swift
+date.start(of: .day, calendar: Calendar(identifier: .gregorian))
+```
+Tip: You can use `TaskLocal` to set the default value for a specific task and it's subtasks.
+```swift
+extension Calendar {
+  @TaskLocal
+  static var local: Calendar = .autoupdatingCurrent
+}
+
+Calendar.$local.withValue(Calendar(identifier: .gregorian)) {
+  print(Date.now.start(of: .day))
+}
+```
+
 ### TimeInterval
 - `DatesCollection` struct and function `each(Int, Calendar.Component) -> DatesCollection`.
 ### DateComponents
@@ -75,7 +87,7 @@ import PackageDescription
 let package = Package(
   name: "SomeProject",
   dependencies: [
-    .package(url: "https://github.com/dankinsoid/VDDate.git", from: "0.9.0")
+    .package(url: "https://github.com/dankinsoid/VDDate.git", from: "0.10.0")
   ],
   targets: [
     .target(name: "SomeProject", dependencies: ["VDDate"])

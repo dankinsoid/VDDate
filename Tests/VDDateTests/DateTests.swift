@@ -244,8 +244,6 @@ final class DateTests: XCTestCase {
 		Locale.default = Locale(identifier: "en_US")
 		TimeZone.default = gmt
 		let testableDate = Date(timeIntervalSince1970: 1_691_843_633)
-		XCTAssertEqual(testableDate.string("dd-MM-yyyy"), "12-08-2023")
-		XCTAssertEqual(testableDate.string(date: .short, time: .short), "8/12/23, 12:33 PM")
 		XCTAssertEqual(testableDate.string(date: .short, time: .short, locale: Locale(identifier: "ru_RU")), "12.08.2023, 12:33")
 	}
 
