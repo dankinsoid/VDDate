@@ -60,6 +60,8 @@ extension Calendar {
   static var local: Calendar = .autoupdatingCurrent
 }
 
+Calendar.bootstrap(default: .local)
+
 Calendar.$local.withValue(Calendar(identifier: .gregorian)) {
   print(Date.now.start(of: .day))
 }
@@ -87,7 +89,7 @@ import PackageDescription
 let package = Package(
   name: "SomeProject",
   dependencies: [
-    .package(url: "https://github.com/dankinsoid/VDDate.git", from: "0.10.0")
+    .package(url: "https://github.com/dankinsoid/VDDate.git", from: "0.11.0")
   ],
   targets: [
     .target(name: "SomeProject", dependencies: ["VDDate"])
