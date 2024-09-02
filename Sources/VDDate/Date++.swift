@@ -166,13 +166,20 @@ public extension Date {
 		if component == .day {
 			return calendar.startOfDay(for: self)
 		}
-		var set = component.allLarger
-        var date = self
-        // If the component is larger than a day, we need to add a day to the date to get the correct start of the component for some calendars, for example, the Islamic calendar.
-        if !set.contains(.day) {
-            date = date.addingTimeInterval(86400)
+        var set = component.allLarger
+
+        if
+            component == .month,
+            [.islamic, .islamicCivil, .islamicTabular, .islamicUmmAlQura].contains(calendar.identifier),
+            let startOfYear = calendar.date(from: DateComponents(calendar: calendar, year: calendar.component(.year, from: self), month: 1)),
+            let index = calendar.dateComponents([.month], from: startOfYear, to: self).month
+        {
+            var components = calendar.dateComponents(set, from: self)
+            components.month = index + 1
+            return calendar.date(from: components) ?? self
         }
-        return calendar.date(from: calendar.dateComponents(set, from: date)) ?? self
+        set.insert(component)
+        return calendar.date(from: calendar.dateComponents(set, from: self)) ?? self
 	}
 
 	/// Returns the last moment of a given Date, as a Date, with given accuracy.
