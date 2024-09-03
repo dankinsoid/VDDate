@@ -184,7 +184,7 @@ public extension Date {
 
 	/// Returns the last moment of a given Date, as a Date, with given accuracy.
 	///
-	/// For example, pass in `.day`, if you want the start of today.
+	/// For example, pass in `.day`, if you want the end of today.
 	/// - Parameters:
 	///   - component: The component to compute for
 	///   - toGranularity: The component to compute for
@@ -192,6 +192,7 @@ public extension Date {
 	/// - Returns: The last moment of the given date.
 	func end(of component: Calendar.Component, toGranularity: Calendar.Component? = nil, calendar: Calendar = .default) -> Date {
 		guard component > .second else { return self }
+        guard component != toGranularity else { return start(of: component, calendar: calendar) }
 		var smaller: Calendar.Component?
 		if let smallest = toGranularity, calendar.range(of: smallest, in: component, for: self) != nil {
 			if smallest == .nanosecond {
